@@ -4,12 +4,16 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-// 函数用于生成Collatz猜想的数列
-void collatz_sequence(int start)
+// generate Collatz sequence
+void collatz_sequence(int pid, int start)
 {
+    if (pid == 0)
+    {
+        printf("Child:");
+    }
     while (start != 1)
     {
-        printf("Child: %d\n", start);
+        printf(" %d", start);
 
         if (start % 2 == 0)
         {
@@ -21,7 +25,7 @@ void collatz_sequence(int start)
         }
     }
 
-    printf("Child: 1\n");
+    printf(" 1\n");
 }
 
 int main(int argc, char *argv[])
@@ -36,7 +40,7 @@ int main(int argc, char *argv[])
 
     if (start <= 0)
     {
-        printf("The number must be positive!");
+        printf("The number must be positive!\n");
         return 1;
     }
 
@@ -49,12 +53,12 @@ int main(int argc, char *argv[])
     }
     else if (pid == 0)
     {
-        // 子进程中生成数列
-        collatz_sequence(start);
+        // generate sequence in child process
+        collatz_sequence(pid, start);
     }
     else
     {
-        // 父进程等待子进程结束
+        // wait for child
         wait(NULL);
         printf("\nParent: Done.\n");
     }

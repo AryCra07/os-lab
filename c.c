@@ -9,8 +9,8 @@
 
 int main()
 {
-    int pipe1[2]; // 管道1，从父进程到子进程
-    int pipe2[2]; // 管道2，从子进程到父进程
+    int pipe1[2]; // pipe 1 from parent to child
+    int pipe2[2]; // pipe 2 from child to parent
 
     if (pipe(pipe1) == -1 || pipe(pipe2) == -1)
     {
@@ -28,14 +28,14 @@ int main()
 
     if (pid == 0)
     {
-        // 子进程
-        close(pipe1[1]); // 关闭管道1写入端
-        close(pipe2[0]); // 关闭管道2读取端
+        // child
+        close(pipe1[1]); // close pipe 1 - write
+        close(pipe2[0]); // close pipe 2 - read
 
         char message[MAX_SIZE];
-        read(pipe1[0], message, sizeof(message)); // 从管道1中读取消息
+        read(pipe1[0], message, sizeof(message)); // read from pipe 1
 
-        // 将消息中的字母大小写进行翻转
+        // flip the capitalization of letters
         for (int i = 0; message[i] != '\0'; i++)
         {
             if (islower(message[i]))
@@ -48,24 +48,24 @@ int main()
             }
         }
 
-        write(pipe2[1], message, strlen(message) + 1); // 将翻转后的消息写入管道2
+        write(pipe2[1], message, strlen(message) + 1); // write to pipe 2
 
         close(pipe1[0]);
         close(pipe2[1]);
     }
     else
     {
-        // 父进程
-        close(pipe1[0]); // 关闭管道1读取端
-        close(pipe2[1]); // 关闭管道2写入端
+        // parent
+        close(pipe1[0]); // close pipe 1 read
+        close(pipe2[1]); // cloase pipe 2 write
 
         char message[256];
         printf("Enter a message in parent: ");
-        fgets(message, sizeof(message), stdin); // 从用户输入中获取消息
+        fgets(message, sizeof(message), stdin); // get message from user
 
-        write(pipe1[1], message, strlen(message) + 1); // 将消息写入管道1
+        write(pipe1[1], message, strlen(message) + 1); // wirte to pipe 1
 
-        read(pipe2[0], message, sizeof(message)); // 从管道2中读取翻转后的消息
+        read(pipe2[0], message, sizeof(message)); // read processed message from pipe 2
 
         printf("Received message from child: %s", message);
 

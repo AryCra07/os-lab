@@ -46,15 +46,15 @@ int main(int argc, char *argv[])
 
     if (start <= 0)
     {
-        printf("The number must be positive!");
+        printf("The number must be positive!\n");
         return 1;
     }
 
-    // 创建共享内存对象
+    // create shared memory
     int shm_fd = shm_open("/collatz_shm", O_CREAT | O_RDWR, 0666);
     ftruncate(shm_fd, SHM_SIZE);
 
-    // 映射共享内存到进程地址空间
+    // map shared memory to process address space
     int *shm_ptr = (int *)mmap(0, SHM_SIZE, PROT_WRITE | PROT_READ, MAP_SHARED, shm_fd, 0);
 
     pid_t pid = fork();
@@ -66,15 +66,15 @@ int main(int argc, char *argv[])
     }
     else if (pid == 0)
     {
-        // 子进程中生成数列并写入共享内存
+        // generate sequence and write to shm in child
         collatz_sequence(start, shm_ptr);
     }
     else
     {
-        // 父进程等待子进程结束
+        // wait for child
         wait(NULL);
 
-        // 输出共享内存中的序列内容
+        // print
         printf("------sequence from shared memory------\n");
         int index = 0;
         while (shm_ptr[index] != 0)
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
         printf("\n");
         printf("----------------- END -----------------\n");
 
-        // 删除共享内存对象
+        // delete
         munmap(shm_ptr, SHM_SIZE);
         close(shm_fd);
         shm_unlink("/collatz_shm");
